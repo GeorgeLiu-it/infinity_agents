@@ -36,42 +36,32 @@ def time_tool(_: str = "") -> str:
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return f"The current server time is {now}"
 
-# --- Add MCP client tool ---
-class MCPTool:
-    def __init__(self, url: str):
-        self.url = url
-        self.session: ClientSession | None = None
-
-    async def connect(self):
-        """连接 MCP WebSocket"""
-        async with websocket_client(self.url) as (read, write):
-            self.session = ClientSession(read, write)
-            await self.session.initialize()
-
-    async def query(self, query: str) -> str:
-        if not self.session:
-            raise RuntimeError("MCP session not connected. Call connect() first.")
-        # 假设 MCP 服务器上有一个工具名为 "query"
-        result = await self.session.call_tool("query", {"input": query})
-        return str(result)
-
-# Example remote public MCP server
-mcp_tool = MCPTool("wss://mcp.openai.com/weather")
-# 在程序启动时连接 MCP
-# asyncio.run(mcp_tool.connect())
-
-# Example remote MCP tool (placeholder)
-@tool("mcp_tool", return_direct=False)
-def mcp_tool_run(query: str) -> str:
-    """通过 MCP 查询远程数据"""
+# Get data from PostgreSQL
+@tool("query_postgres_tool", return_direct=False)
+def query_postgres(query: str) -> str:
+    """
+    Executes a SQL query on the 'personal_info' table in the MCP PostgreSQL database.
+    Example input: "SELECT * FROM personal_info LIMIT 5;"
+    """
     try:
-        return asyncio.run(mcp_tool.query(query))
+        conn = psycopg2.connect(
+            dbname=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+            host=os.getenv("POSTGRES_HOST"),
+            port=os.getenv("POSTGRES_PORT", 5432)
+        )
+        cursor = conn.cursor()
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return str(rows)
     except Exception as e:
-        return f"MCP error: {str(e)}"
-
+        return f"Error querying database: {str(e)}"
 
 # Regist tools
-tools = [search_tool, time_tool, mcp_tool_run]
+tools = [search_tool, time_tool, query_postgres]
 
 # 初始化模型
 model = init_chat_model("deepseek-chat", model_provider="deepseek")
