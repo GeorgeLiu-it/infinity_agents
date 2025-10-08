@@ -40,7 +40,7 @@ async def interaction(request: Request):
 
     # Standardized response format
     return {
-        "response": "glad to help you here!",
+        "response": "Glad to help you here! \n Your message is: " + user_message,
         "tools": None
     }
 
@@ -49,6 +49,6 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=443,
-        ssl_certfile="certs/certificate.crt",   # 证书路径
-        ssl_keyfile="certs/private.key"      # 私钥路径
+        ssl_certfile="certs/certificate.crt",   # Certificate Path
+        ssl_keyfile="certs/private.key"      # Private Key Path
     )

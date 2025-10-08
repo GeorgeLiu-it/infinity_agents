@@ -13,13 +13,13 @@ import psycopg2
 # from mcp.client import ClientSession
 # from mcp.client.websocket import websocket_client
 
-# 加载环境变量
+# Load environment variables
 load_dotenv()
 
 if not os.environ.get("DEEPSEEK_API_KEY"):
     os.environ["DEEPSEEK_API_KEY"] = getpass.getpass("Enter API key for DeepSeek: ")
 
-# Tavily 搜索
+# Tavily Search
 search = TavilySearch(max_results=2)
 
 @tool("web_search", return_direct=False)
@@ -63,19 +63,19 @@ def query_postgres(query: str) -> str:
 # Regist tools
 tools = [search_tool, time_tool, query_postgres]
 
-# 初始化模型
+# Initialize model
 model = init_chat_model("deepseek-chat", model_provider="deepseek")
 model_with_tools = model.bind_tools(tools)
 from langchain.tools import tool
 
-# 初始化 agent + memory
+# Initialize agent + memory
 memory = MemorySaver()
 agent_executor = create_react_agent(model, tools, checkpointer=memory)
 
 
 def run_agent(user_message: str, thread_id: str = "default-thread"):
     """
-    接收用户输入，调用 DeepSeek + Tavily Agent，并返回结果
+    Receives user input, calls DeepSeek + Tavily Agent, and returns the result.
     """
     print("start")
     config = {"configurable": {"thread_id": thread_id}}
@@ -87,6 +87,6 @@ def run_agent(user_message: str, thread_id: str = "default-thread"):
     return response
 
 if __name__ == "__main__":
-    user_query = "请查询今天的天气信息"
+    user_query = "Please query today's weather information"
     result = run_agent(user_query)
-    print("Agent 返回结果：", result)
+    print("Agent returned result:", result)
