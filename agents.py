@@ -6,18 +6,50 @@ from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from langchain.tools import tool
-import asyncio
-import psycopg2
-
-# MCP SDK
-# from mcp.client import ClientSession
-# from mcp.client.websocket import websocket_client
+from mcp.client import ClientSession
+from mcp.client.websocket import websocket_client
+import psycopg2, requests
 
 # Load environment variables
 load_dotenv()
 
 if not os.environ.get("DEEPSEEK_API_KEY"):
     os.environ["DEEPSEEK_API_KEY"] = getpass.getpass("Enter API key for DeepSeek: ")
+
+MCP_SERVER_URL = os.environ["MCP_SERVER_URL"]
+
+# MCP Personal Info Checker Tool
+@tool("mcp_query_personal_info", return_direct=False)
+def mcp_query_personal_info(email: str) -> str:
+    """
+    Queries the MCP server for personal info by email address.
+    Example input: "ethan.williams245@example.com"
+    """
+    try:
+        endpoint = f"{MCP_SERVER_URL}/personal_info"
+        response = requests.get(endpoint, params={"email": email})
+        response.raise_for_status()
+        data = response.json()
+
+        # Pretty formatting for LLM readability
+        formatted = (
+            f"✅ Personal Information Found:\n"
+            f"- Name: {data.get('first_name')} {data.get('last_name')}\n"
+            f"- Email: {data.get('email')}\n"
+            f"- Phone: {data.get('phone')}\n"
+            f"- DOB: {data.get('dob')}\n"
+            f"- Address: {data.get('street_address')}, {data.get('city')}, "
+            f"{data.get('state')} {data.get('postal_code')}, {data.get('country')}"
+        )
+        return formatted
+
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 404:
+            return f"❌ No user found with email: {email}"
+        return f"⚠️ HTTP error: {str(e)}"
+
+    except Exception as e:
+        return f"⚠️ Error querying MCP server: {e}"
 
 # Tavily Search
 search = TavilySearch(max_results=2)
@@ -61,7 +93,7 @@ def query_postgres(query: str) -> str:
         return f"Error querying database: {str(e)}"
 
 # Regist tools
-tools = [search_tool, time_tool, query_postgres]
+tools = [search_tool, time_tool, query_postgres, mcp_query_personal_info]
 
 # Initialize model
 model = init_chat_model("deepseek-chat", model_provider="deepseek")
