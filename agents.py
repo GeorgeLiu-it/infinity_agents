@@ -6,8 +6,6 @@ from langchain.chat_models import init_chat_model
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
 from langchain.tools import tool
-# from mcp.client import ClientSession
-# from mcp.client.websocket import websocket_client
 import psycopg2, requests
 
 # Load environment variables
