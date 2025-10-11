@@ -7,12 +7,10 @@ app = FastAPI()
 @app.post("/webhook/message")
 async def webhook_message(request: Request):
     body = await request.json()
-    user_message = body.get("message", "")
+    user_message = body.get("message", "hello")
+    prompt_id = body.get("prompt_id", "")
 
-    if not user_message:
-        return {"error": "Missing 'message' in request body"}
-
-    response = run_agent(user_message, thread_id="webhook-thread")
+    response = run_agent(user_message, thread_id=prompt_id)
     
     print(response)
 
