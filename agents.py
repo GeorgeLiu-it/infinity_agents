@@ -91,7 +91,7 @@ def query_postgres(query: str) -> str:
         return f"Error querying database: {str(e)}"
 
 # Regist tools
-tools = [search_tool, time_tool, query_postgres, mcp_query_personal_info]
+tools = [search, search_tool, time_tool, query_postgres, mcp_query_personal_info]
 
 # Initialize model
 model = init_chat_model("deepseek-chat", model_provider="deepseek")

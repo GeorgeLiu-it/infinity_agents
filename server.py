@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 import uvicorn
-from agents import run_agent
+from agents_with_logger import run_agent
 
 app = FastAPI()
 
