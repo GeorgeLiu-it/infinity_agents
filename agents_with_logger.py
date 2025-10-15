@@ -144,7 +144,7 @@ logger.info(f"🛠️ Registered {len(tools)} tools: {[tool.name for tool in too
 # Initialize model
 logger.info("🤖 Initializing DeepSeek Chat Model...")
 logger.info(f"🤖 Using system prompt from agent_config.py")
-model = init_chat_model("deepseek-chat", model_provider="deepseek", model_kwargs={"system_message": DEFAULT_SYSTEM_PROMPT})
+model = init_chat_model("deepseek-chat", model_provider="deepseek")
 logger.info("✅ DeepSeek model initialized")
 
 model_with_tools = model.bind_tools(tools)
@@ -170,7 +170,10 @@ def run_agent(user_message: str, thread_id: str = DEFAULT_THREAD_ID):
     logger.info(f"🧵 Thread ID: {thread_id}")
     
     config = {"configurable": {"thread_id": thread_id}}
-    input_message = {"role": "user", "content": user_message}
+    input_message = [
+        {"role": "system", "content": DEFAULT_SYSTEM_PROMPT},
+        {"role": "user", "content": user_message}
+    ]
 
     logger.info("🔄 Invoking agent executor...")
     start_time = datetime.now()
