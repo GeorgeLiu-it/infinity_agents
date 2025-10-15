@@ -10,6 +10,10 @@ import psycopg2, requests
 import logging
 from datetime import datetime
 import json
+from agent_config import (
+    DEFAULT_SYSTEM_PROMPT,
+    DEFAULT_THREAD_ID
+)
 
 # Setup comprehensive logging
 logging.basicConfig(
@@ -139,7 +143,8 @@ logger.info(f"🛠️ Registered {len(tools)} tools: {[tool.name for tool in too
 
 # Initialize model
 logger.info("🤖 Initializing DeepSeek Chat Model...")
-model = init_chat_model("deepseek-chat", model_provider="deepseek")
+logger.info(f"🤖 Using system prompt from agent_config.py")
+model = init_chat_model("deepseek-chat", model_provider="deepseek", system_message=DEFAULT_SYSTEM_PROMPT)
 logger.info("✅ DeepSeek model initialized")
 
 model_with_tools = model.bind_tools(tools)
@@ -155,7 +160,7 @@ agent_executor = create_react_agent(model, tools, checkpointer=memory)
 logger.info("✅ ReAct Agent created successfully")
 
 
-def run_agent(user_message: str, thread_id: str = "default-thread"):
+def run_agent(user_message: str, thread_id: str = DEFAULT_THREAD_ID):
     """
     Receives user input, calls DeepSeek + Tavily Agent, and returns the result.
     """
