@@ -179,7 +179,7 @@ def run_agent(user_message: str, thread_id: str = DEFAULT_THREAD_ID):
     start_time = datetime.now()
     
     try:
-        response = agent_executor.invoke({"messages": [input_message]}, config)
+        response = agent_executor.invoke({"messages": input_message}, config)
         process_time = (datetime.now() - start_time).total_seconds()
         
         logger.info(f"✅ AGENT EXECUTION COMPLETED")
