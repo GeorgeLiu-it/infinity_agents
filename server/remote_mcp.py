@@ -19,7 +19,7 @@ logging.basicConfig(
 logger = logging.getLogger("remote_mcp")
 
 # Changed server name to remote_mcp
-mcp = FastMCP("remote_mcp")
+mcp = FastMCP("remote_mcp", host="0.0.0.0", port=8000)
 
 # Get the current system usage
 @mcp.tool()
@@ -89,7 +89,9 @@ async def get_weather(location: str) -> str:
 if __name__ == "__main__":
     logger.info("Starting Remote MCP Server on port 8000")
     try:
-        mcp.run(transport="sse", port=8000)
+        import inspect
+        print(inspect.signature(mcp.run))
+        mcp.run(transport="sse")
     except Exception as e:
         logger.error(f"Failed to start MCP server: {e}")
         raise
