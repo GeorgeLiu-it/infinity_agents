@@ -15,8 +15,13 @@ async def webhook_message(request: Request):
     
     print(response)
 
+    last_message = response["messages"][-1].content.lower()
+    end_keywords = ['goodbye', 'end interaction', '再见', 'bye', '结束', '对话结束']
+    end_interaction = any(keyword in last_message for keyword in end_keywords)
+
     return {"response": response["messages"][-1].content,
-            "tools": response["messages"][-2].name
+            "tools": response["messages"][-2].name,
+            "end_interaction": end_interaction
             }
 
 

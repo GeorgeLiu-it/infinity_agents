@@ -25,3 +25,5 @@ python server/weather.py
 ### Remote mcp server running as container in 106.13.91.222
 
 ### Remote 3rd party service running as container in 106.13.91.222
+
+### Postgres:18 running as container in 106.13.91.222
