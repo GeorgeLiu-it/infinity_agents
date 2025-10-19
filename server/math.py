@@ -6,7 +6,7 @@ import os
 mcp = FastMCP("Math")
 
 # Directory where resources are stored
-RESOURCE_DIR = os.path.join(os.path.dirname(__file__), "resources")
+RESOURCE_DIR = os.path.join(os.path.dirname(__file__), "../resources")
 
 # Resource loader
 def read_resource_file(name: str) -> str:
@@ -14,7 +14,7 @@ def read_resource_file(name: str) -> str:
     file_path = os.path.join(RESOURCE_DIR, f"{name}.txt")
     print(file_path)
     if not os.path.exists(file_path):
-        return f"Intro file '{name}.txt' not found."
+        return f"Function read_resource_file(path: '{file_path}') not found."
     with open(file_path, "r") as f:
         return f.read()
 
