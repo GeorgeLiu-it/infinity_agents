@@ -206,7 +206,7 @@ async def run_agent(request: Request, user_message: str, thread_id: str = DEFAUL
     try:
         # response = agent_executor.invoke({"messages": input_message}, config)
         executor = request.app.state.agent_executor
-        response = await executor.ainvoke({"messages": [input_message]}, config)
+        response = await executor.ainvoke({"messages": input_message}, config)
         process_time = (datetime.now() - start_time).total_seconds()
         
         logger.info(f"✅ AGENT EXECUTION COMPLETED")
