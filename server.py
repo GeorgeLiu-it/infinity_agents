@@ -9,8 +9,9 @@ async def webhook_message(request: Request):
     body = await request.json()
     user_message = body.get("message", "hello")
     prompt_id = body.get("prompt_id", "")
+    uuid = body.get("uuid", "default-thread")
 
-    response = await run_agent(request, user_message, thread_id=prompt_id)
+    response = await run_agent(request, user_message, thread_id=prompt_id+uuid)
     
     print(response)
 
