@@ -80,7 +80,7 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=443,
-        ssl_certfile="certs/certificate.crt",   # 证书路径
-        ssl_keyfile="certs/private.key"      # 私钥路径
+        port=8080,
+        # ssl_certfile="certs/certificate.crt",   # 证书路径
+        # ssl_keyfile="certs/private.key"      # 私钥路径
     )

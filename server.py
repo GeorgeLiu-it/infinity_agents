@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request
 import uvicorn
-from agents_with_logger import run_agent
+from agents_with_logger import run_agent, lifespan
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/webhook/message")
 async def webhook_message(request: Request):
@@ -10,7 +10,7 @@ async def webhook_message(request: Request):
     user_message = body.get("message", "hello")
     prompt_id = body.get("prompt_id", "")
 
-    response = run_agent(user_message, thread_id=prompt_id)
+    response = await run_agent(request, user_message, thread_id=prompt_id)
     
     print(response)
 
