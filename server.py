@@ -16,7 +16,7 @@ async def webhook_message(request: Request):
     print(response)
 
     last_message = response["messages"][-1].content.lower()
-    end_keywords = ['goodbye', 'end_interaction', '再见', 'bye', '结束', '对话结束']
+    end_keywords = ['end_interaction', '结束对话']
     end_interaction = any(keyword in last_message for keyword in end_keywords)
 
     connect_keywords = ['connect_live_agent', '连接客服']
