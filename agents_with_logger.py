@@ -165,7 +165,7 @@ def query_postgres(query: str) -> str:
         return f"Error querying database: {str(e)}"
 
 # Register tools
-tools = [search, search_tool, time_tool, query_postgres, mcp_query_personal_info]
+tools = [search, time_tool, query_postgres, mcp_query_personal_info]
 logger.info(f"🛠️ Registered {len(tools)} tools: {[tool.name for tool in tools]}")
 
 # Initialize model
