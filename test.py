@@ -1,79 +1,101 @@
+import aiohttp
+import os
 import asyncio
 import logging
-import os
-import aiohttp
+
 from dotenv import load_dotenv
 
-# === Logging setup ===
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 # Load environment variables
 load_dotenv()
 
-# === Weather Tool ===
 async def get_weather(location: str) -> str:
-    """Get real-time weather information for a location using OpenWeatherMap API."""
+    """Get real-time weather information for a location."""
     logger.info(f"get_weather tool invoked for location: {location}")
     
-    api_key = os.getenv("OPENWEATHER_API_KEY")
-    if not api_key:
-        logger.error("Missing OpenWeatherMap API key.")
-        return "Error: Missing API key for weather service. Please set OPENWEATHER_API_KEY."
-
     try:
-        url = "https://api.openweathermap.org/data/2.5/weather"
+        # Use OpenWeatherMap API, you need to register and get an API key
+        # Read API key from environment variable
+        # api_key = os.getenv("OPENWEATHER_API_KEY")
+        api_key = "a30778ccb6cde56df48816b7dbc83372"
+        if not api_key:
+            return "Error: OpenWeatherMap API key not found. Please set OPENWEATHER_API_KEY environment variable."
+        
+        # Build API request URL
+        base_url = "http://api.openweathermap.org/data/2.5/weather"
         params = {
-            "q": location,
-            "appid": api_key,
-            "units": "metric",   # Celsius
-            "lang": "zh_cn"      # Chinese description
+            'q': location,
+            'appid': api_key,
+            'units': 'metric',  # Use Celsius
+            'lang': 'en'        # English description
         }
-
-        logger.debug(f"Sending request to OpenWeatherMap for {location}: {url} {params}")
-
+        
+        logger.debug(f"Fetching weather data for: {location}")
+        
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, params=params) as response:
-                if response.status != 200:
-                    text = await response.text()
-                    logger.error(f"Weather API request failed: {response.status}, {text}")
-                    return f"Error: Unable to fetch weather for {location}. (HTTP {response.status})"
-
-                data = await response.json()
-                logger.debug(f"Weather data received for {location}: {data}")
-
-                # Parse the returned data
-                weather_main = data["weather"][0]["description"]
-                temp = data["main"]["temp"]
-                humidity = data["main"]["humidity"]
-                wind_speed = data["wind"]["speed"]
-
-                weather_info = (
-                    f"当前{location}天气：{weather_main}，气温 {temp}°C，"
-                    f"湿度 {humidity}% ，风速 {wind_speed} m/s。"
-                )
-
-                logger.info(f"Weather data retrieved successfully for {location}")
-                return weather_info
-
+            async with session.get(base_url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    # Parse weather data
+                    city = data.get('name', location)
+                    country = data.get('sys', {}).get('country', '')
+                    temp = data['main']['temp']
+                    feels_like = data['main']['feels_like']
+                    humidity = data['main']['humidity']
+                    description = data['weather'][0]['description']
+                    wind_speed = data['wind']['speed']
+                    
+                    weather_data = (
+                        f"Weather in {city}, {country}:\n"
+                        f"🌡️ Temperature: {temp}°C (Feels like {feels_like}°C)\n"
+                        f"☁️ Conditions: {description}\n"
+                        f"💧 Humidity: {humidity}%\n"
+                        f"🌬️ Wind Speed: {wind_speed} m/s"
+                    )
+                    
+                    logger.info(f"Weather data retrieved for {location}")
+                    return weather_data
+                    
+                elif response.status == 404:
+                    return f"Error: Location '{location}' not found. Please check the spelling."
+                else:
+                    error_text = await response.text()
+                    logger.error(f"Weather API error: {response.status} - {error_text}")
+                    return f"Error getting weather information: HTTP {response.status}"
+                    
+    except aiohttp.ClientError as e:
+        logger.error(f"Network error in get_weather for {location}: {e}")
+        return f"Network error: Unable to connect to weather service - {str(e)}"
     except Exception as e:
-        logger.exception(f"Error in get_weather for {location}: {e}")
+        logger.error(f"Error in get_weather for {location}: {e}")
         return f"Error getting weather for {location}: {str(e)}"
 
+async def main():
+    """Test function for the weather tool"""
+    # Test locations
+    test_locations = ["London", "New York", "Tokyo", "Paris"]
+    
+    for location in test_locations:
+        print(f"\n{'='*50}")
+        print(f"Testing weather for: {location}")
+        print(f"{'='*50}")
+        
+        result = await get_weather(location)
+        print(result)
+        
+        # Small delay between requests
+        await asyncio.sleep(1)
 
-# === Main function for CLI testing ===
 if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) < 2:
-        print("Usage: python get_weather.py <location>")
-        sys.exit(1)
-
-    location = " ".join(sys.argv[1:])
-    print(f"Fetching weather for: {location}")
-
-    # Run the async function in main
-    result = asyncio.run(get_weather(location))
-    print(result)
+    # Check if API key is set
+    if not os.getenv("OPENWEATHER_API_KEY"):
+        print("ERROR: OPENWEATHER_API_KEY environment variable is not set!")
+        print("Please set it first:")
+        print("export OPENWEATHER_API_KEY='your_api_key_here'")
+    else:
+        # Run the test
+        asyncio.run(main())
