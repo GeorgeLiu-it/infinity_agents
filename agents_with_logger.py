@@ -15,6 +15,33 @@ from agent_config import (
     DEFAULT_THREAD_ID
 )
 
+from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
+from langchain_mcp_adapters.client import MultiServerMCPClient, load_mcp_tools
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    server_path = os.path.join(current_dir, "server/math.py")
+
+    client = MultiServerMCPClient({
+        "remote_mcp": {"url": "http://106.13.91.222:8000/sse", "transport": "sse"},
+        "weather": {"url": "http://localhost:8000/sse", "transport": "sse"},
+        "math": {"command": "/home/george/mcp_langchain/.venv/bin/python", "args": [server_path], "transport": "stdio"},
+    })
+
+    # Open both sessions and keep them alive
+    async with client.session("math") as math_sess, client.session("weather") as weather_sess, client.session("remote_mcp") as remote_mcp_sess:
+        m_tools = await load_mcp_tools(math_sess)
+        w_tools = await load_mcp_tools(weather_sess)
+        r_tools = await load_mcp_tools(remote_mcp_sess)
+        all_tools = m_tools + w_tools + r_tools + tools
+
+        app.state.agent_executor = create_react_agent(model, all_tools, checkpointer=memory)
+
+        # ✅ Yield control back to FastAPI; sessions stay open
+        yield
+
 # Setup comprehensive logging
 logging.basicConfig(
     level=logging.INFO,
@@ -160,7 +187,7 @@ agent_executor = create_react_agent(model, tools, checkpointer=memory)
 logger.info("✅ ReAct Agent created successfully")
 
 
-def run_agent(user_message: str, thread_id: str = DEFAULT_THREAD_ID):
+async def run_agent(request: Request, user_message: str, thread_id: str = DEFAULT_THREAD_ID):
     """
     Receives user input, calls DeepSeek + Tavily Agent, and returns the result.
     """
@@ -179,7 +206,9 @@ def run_agent(user_message: str, thread_id: str = DEFAULT_THREAD_ID):
     start_time = datetime.now()
     
     try:
-        response = agent_executor.invoke({"messages": input_message}, config)
+        # response = agent_executor.invoke({"messages": input_message}, config)
+        executor = request.app.state.agent_executor
+        response = await executor.ainvoke({"messages": input_message}, config)
         process_time = (datetime.now() - start_time).total_seconds()
         
         logger.info(f"✅ AGENT EXECUTION COMPLETED")

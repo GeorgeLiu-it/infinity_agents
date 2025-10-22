@@ -1,21 +1,31 @@
 from fastapi import FastAPI, Request
 import uvicorn
-from agents_with_logger import run_agent
+from agents_with_logger import run_agent, lifespan
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/webhook/message")
 async def webhook_message(request: Request):
     body = await request.json()
     user_message = body.get("message", "hello")
     prompt_id = body.get("prompt_id", "")
+    uuid = body.get("uuid", "default-thread")
 
-    response = run_agent(user_message, thread_id=prompt_id)
+    response = await run_agent(request, user_message, thread_id=prompt_id+uuid)
     
     print(response)
 
+    last_message = response["messages"][-1].content.lower()
+    end_keywords = ['end_current_conversation', '结束对话']
+    end_interaction = any(keyword in last_message for keyword in end_keywords)
+
+    connect_keywords = ['connect_live_agent', '连接客服']
+    connect_live_agent = any(keyword in last_message for keyword in connect_keywords)
+
     return {"response": response["messages"][-1].content,
-            "tools": response["messages"][-2].name
+            "tools": response["messages"][-2].name,
+            "end_interaction": end_interaction,
+            "connect_live_agent": connect_live_agent
             }
 
 
