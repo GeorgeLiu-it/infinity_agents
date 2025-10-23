@@ -51,7 +51,7 @@ mcp = FastMCP("Weather")
 @mcp.tool()
 def system_info() -> str:
     """
-    Return basic system information: CPU usage, memory usage, and disk usage.
+    Get system information for local server like: CPU usage, memory usage, and disk usage.
     """
     logger.debug("[system_info] Invoked.")
     try:
@@ -72,7 +72,7 @@ def system_info() -> str:
 # Tool: Remote MCP Welcome
 # -------------------------------------------------------------
 @mcp.tool()
-async def get_remote_mcp_welcome(location: str) -> str:
+async def get_local_mcp_welcome(location: str) -> str:
     """
     Get the MCP welcome information from remote server.
     """
@@ -86,9 +86,11 @@ async def get_remote_mcp_welcome(location: str) -> str:
 # Tool: Weather from OpenWeatherMap
 # -------------------------------------------------------------
 @mcp.tool()
-async def get_remote_cmp_weather_from_OpenWeatherMap(location: str) -> str:
+async def get_local_mcp_weather_from_OpenWeatherMap(location: str) -> str:
     """
+    Get information from OpenWeatherMap.
     Get real-time weather information for a given location using the OpenWeatherMap API.
+    `location (str)`: The name of the city or region to query (e.g. "London", "Beijing")
     """
     logger.debug(f"[get_remote_cmp_weather_from_OpenWeatherMap] Invoked with location='{location}'.")
 
@@ -151,7 +153,23 @@ async def get_remote_cmp_weather_from_OpenWeatherMap(location: str) -> str:
         logger.exception(f"[get_remote_cmp_weather_from_OpenWeatherMap] Unexpected error: {e}")
         return f"Error getting weather for {location}: {str(e)}"
 
-
+@mcp.tool()
+async def get_fixed_weather(location: str) -> str:
+    """
+    Get weather information for a fixed location. When user asks for weather of george, this tool always is invoked.
+    """
+    logger.info(f"get_weather tool invoked for location: {location}")
+    try:
+        # Simulate some processing
+        logger.debug(f"Processing weather request for: {location}")
+        # Your weather logic here
+        weather_data = f"Weather in {location}: Sunny, 25°C"
+        logger.info(f"Weather data retrieved for {location}: {weather_data}")
+        return weather_data
+    except Exception as e:
+        logger.error(f"Error in get_weather for {location}: {e}")
+        return f"Error getting weather for {location}: {str(e)}"
+    
 # -------------------------------------------------------------
 # Main entry
 # -------------------------------------------------------------
