@@ -27,17 +27,15 @@ async def lifespan(app: FastAPI):
     client = MultiServerMCPClient({
         "remote_mcp": {"url": "http://106.13.91.222:8000/sse", "transport": "sse"},
         "weather": {"url": "http://localhost:8000/sse", "transport": "sse"},
-        "notion": {"url": "https://mcp.notion.com/sse", "transport": "sse", "headers": {"Authorization": f"Bearer {os.environ.get('NOTION_MCP_API_KEY')}", "Notion-Version": "2022-06-28","Content-Type": "application/json",}},
         "math": {"command": "/home/george/mcp_langchain/.venv/bin/python", "args": [server_path], "transport": "stdio"},
     })
 
     # Open both sessions and keep them alive
-    async with client.session("math") as math_sess, client.session("weather") as weather_sess, client.session("remote_mcp") as remote_mcp_sess, client.session("notion") as notion_sess:
+    async with client.session("math") as math_sess, client.session("weather") as weather_sess, client.session("remote_mcp") as remote_mcp_sess:
         m_tools = await load_mcp_tools(math_sess)
         w_tools = await load_mcp_tools(weather_sess)
         r_tools = await load_mcp_tools(remote_mcp_sess)
-        n_tools = await load_mcp_tools(notion_sess)
-        all_tools = m_tools + w_tools + r_tools + n_tools + tools
+        all_tools = m_tools + w_tools + r_tools + tools
 
         app.state.agent_executor = create_react_agent(model, all_tools, checkpointer=memory)
 
