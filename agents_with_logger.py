@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     client = MultiServerMCPClient({
         "remote_mcp": {"url": "http://106.13.91.222:8000/sse", "transport": "sse"},
         "weather": {"url": "http://localhost:8000/sse", "transport": "sse"},
-        "notion": {"url": "https://mcp.notion.com/sse", "transport": "sse"},
+        "notion": {"url": "https://mcp.notion.com/sse", "transport": "sse", "headers": {"Authorization": f"Bearer {os.environ.get('NOTION_MCP_API_KEY')}"}},
         "math": {"command": "/home/george/mcp_langchain/.venv/bin/python", "args": [server_path], "transport": "stdio"},
     })
 
