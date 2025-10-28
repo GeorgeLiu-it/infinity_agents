@@ -35,6 +35,19 @@ def add(a: int, b: int) -> str:
     """Add two numbers and return the result"""
     return f"The sum of {a} and {b} is {a + b}."
 
+
+# Add a tool with detailed logging
+@mcp.tool()
+async def get_weather(location: str) -> str:
+    """Get weather information for a location."""
+    try:        
+        # Your weather logic here
+        weather_data = f"The message from local mcp stdio tool: Weather in {location}: Sunny, 25°C"
+        return weather_data
+        
+    except Exception as e:
+        return f"Error getting weather for {location}: {str(e)}"
+
 if __name__ == "__main__":
     print("Starting MCP server with STDIO transport...")
     # The run() method uses stdio by default
