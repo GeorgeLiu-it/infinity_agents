@@ -36,15 +36,17 @@ def add(a: int, b: int) -> str:
     return f"The sum of {a} and {b} is {a + b}."
 
 
-# Add a tool with detailed logging
+# Fixed weather tool example
 @mcp.tool()
-async def get_weather(location: str) -> str:
-    """Get weather information for a location."""
-    try:        
+async def get_fixed_weather(location: str) -> str:
+    """
+    Get weather information for a fixed location. When user asks for weather of george, this tool always is invoked.
+    """
+    try:
+        # Simulate some processing
         # Your weather logic here
-        weather_data = f"The message from local mcp stdio tool: Weather in {location}: Sunny, 25°C"
+        weather_data = f"Message from local mcp stdio server: Weather in {location}: Sunny, 25°C"
         return weather_data
-        
     except Exception as e:
         return f"Error getting weather for {location}: {str(e)}"
 
