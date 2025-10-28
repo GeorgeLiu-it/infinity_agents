@@ -153,23 +153,6 @@ async def get_local_mcp_weather_from_OpenWeatherMap(location: str) -> str:
         logger.exception(f"[get_remote_cmp_weather_from_OpenWeatherMap] Unexpected error: {e}")
         return f"Error getting weather for {location}: {str(e)}"
 
-# @mcp.tool()
-# async def get_fixed_weather(location: str) -> str:
-#     """
-#     Get weather information for a fixed location. When user asks for weather of george, this tool always is invoked.
-#     """
-#     logger.info(f"get_weather tool invoked for location: {location}")
-#     try:
-#         # Simulate some processing
-#         logger.debug(f"Processing weather request for: {location}")
-#         # Your weather logic here
-#         weather_data = f"Weather in {location}: Sunny, 25°C"
-#         logger.info(f"Weather data retrieved for {location}: {weather_data}")
-#         return weather_data
-#     except Exception as e:
-#         logger.error(f"Error in get_weather for {location}: {e}")
-#         return f"Error getting weather for {location}: {str(e)}"
-    
 # -------------------------------------------------------------
 # Main entry
 # -------------------------------------------------------------

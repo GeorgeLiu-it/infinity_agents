@@ -45,7 +45,7 @@ async def get_fixed_weather(location: str) -> str:
     try:
         # Simulate some processing
         # Your weather logic here
-        weather_data = f"Message from local mcp stdio server: Weather in {location}: Sunny, 25°C"
+        weather_data = f"Message from local mcp stdio server: Weather in {location} from local tool: Sunny, 25°C"
         return weather_data
     except Exception as e:
         return f"Error getting weather for {location}: {str(e)}"

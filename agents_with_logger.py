@@ -164,6 +164,24 @@ def query_postgres(query: str) -> str:
         logger.error(f"💥 PostgreSQL Query Error: {str(e)}", exc_info=True)
         return f"Error querying database: {str(e)}"
 
+# Get weather by using Langchain tool
+@tool()
+async def get_langchain_weather(location: str) -> str:
+    """
+    Get weather information that langchain can provide. When user asks for weather using langchain tool, this tool should be invoked.
+    """
+    logger.info(f"get_langchain_weather tool invoked for location: {location}")
+    try:
+        # Simulate some processing
+        logger.debug(f"Processing weather request for: {location}")
+        # Your weather logic here
+        weather_data = f"Langchain weather response: Weather in {location} from langchain tool: Cloud, 18°C"
+        logger.info(f"Weather data retrieved for {location}: {weather_data}")
+        return weather_data
+    except Exception as e:
+        logger.error(f"Error in get_langchain_weather for {location}: {e}")
+        return f"Error getting weather for {location}: {str(e)}"
+
 # Register tools
 tools = [search, time_tool, query_postgres, mcp_query_personal_info]
 logger.info(f"🛠️ Registered {len(tools)} tools: {[tool.name for tool in tools]}")
