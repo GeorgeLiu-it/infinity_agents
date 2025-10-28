@@ -165,8 +165,8 @@ def query_postgres(query: str) -> str:
         return f"Error querying database: {str(e)}"
 
 # Get weather by using Langchain tool
-@tool()
-async def get_langchain_weather(location: str) -> str:
+@tool("get_langchain_weather", return_direct=False)
+def get_langchain_weather(location: str = "") -> str:
     """
     Get weather information that langchain can provide. When user asks for weather using langchain tool, this tool should be invoked.
     """
@@ -183,7 +183,7 @@ async def get_langchain_weather(location: str) -> str:
         return f"Error getting weather for {location}: {str(e)}"
 
 # Register tools
-tools = [search, time_tool, query_postgres, mcp_query_personal_info]
+tools = [search, get_langchain_weather, time_tool, query_postgres, mcp_query_personal_info]
 logger.info(f"🛠️ Registered {len(tools)} tools: {[tool.name for tool in tools]}")
 
 # Initialize model
